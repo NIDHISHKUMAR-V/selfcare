@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Inter', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* Pastel Self-Care Palette */
+    --color-lavender-50: #f5f3ff;
+    --color-lavender-100: #ede9fe;
+    --color-lavender-200: #ddd6fe;
+    --color-lavender-300: #c4b5fd;
+    --color-lavender-400: #a78bfa;
+    --color-lavender-500: #8E8CD8;
+    --color-lavender-600: #7c3aed;
+
+    --color-sage-50: #f0fdf4;
+    --color-sage-100: #dcfce7;
+    --color-sage-200: #bbf7d0;
+    --color-sage-300: #A8D8B9;
+    --color-sage-400: #7FA68E;
+    --color-sage-500: #4ade80;
+
+    --color-peach-50: #fff7ed;
+    --color-peach-100: #ffedd5;
+    --color-peach-200: #fed7aa;
+    --color-peach-300: #E8A598;
+    --color-peach-400: #F4A261;
+    --color-peach-500: #f97316;
+
+    --color-background: #F8F7FC;
+    --color-card: #FFFFFF;
+    --color-text-primary: #2D2D3A;
+    --color-text-secondary: #6B6B80;
+    --color-border: #E8E6F0;
+}
