@@ -238,8 +238,17 @@
         </a>
 
         <div class="nav-section-label" style="margin-top:0.75rem;">Finance</div>
-        <a href="#" class="nav-link {{ request()->routeIs('money.*') ? 'active' : '' }}">
+        <a href="{{ route('finance.index') }}" class="nav-link {{ request()->routeIs('finance.index', 'finance.create', 'finance.edit', 'finance.show') ? 'active' : '' }}">
             <i data-lucide="wallet"></i> Money Manager
+        </a>
+        <a href="{{ route('budgets.index') }}" class="nav-link {{ request()->routeIs('budgets.*') ? 'active' : '' }}">
+            <i data-lucide="pie-chart"></i> Budget Planner
+        </a>
+        <a href="{{ route('savings.index') }}" class="nav-link {{ request()->routeIs('savings.*') ? 'active' : '' }}">
+            <i data-lucide="piggy-bank"></i> Savings Goals
+        </a>
+        <a href="{{ route('finance.reports') }}" class="nav-link {{ request()->routeIs('finance.reports') ? 'active' : '' }}">
+            <i data-lucide="trending-up"></i> Financial Reports
         </a>
 
         <div class="nav-section-label" style="margin-top:0.75rem;">Daily Life</div>

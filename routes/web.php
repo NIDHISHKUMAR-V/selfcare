@@ -4,9 +4,13 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FinanceReportController;
 use App\Http\Controllers\FoodLogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SavingsGoalController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WaterLogController;
 use Illuminate\Support\Facades\Route;
 
@@ -55,6 +59,22 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/water/quick-add', [WaterLogController::class, 'quickAdd'])->name('water.quick-add');
     Route::delete('/water/{waterLog}', [WaterLogController::class, 'destroy'])->name('water.destroy');
     Route::put('/water/goal', [WaterLogController::class, 'updateGoal'])->name('water.update-goal');
+
+    // Money Management
+    Route::get('/finance/reports', [FinanceReportController::class, 'index'])->name('finance.reports');
+    Route::get('/finance/export-csv', [FinanceReportController::class, 'exportCsv'])->name('finance.export-csv');
+
+    Route::get('/finance/budgets', [BudgetController::class, 'index'])->name('budgets.index');
+    Route::post('/finance/budgets', [BudgetController::class, 'store'])->name('budgets.store');
+    Route::delete('/finance/budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
+
+    Route::get('/finance/savings', [SavingsGoalController::class, 'index'])->name('savings.index');
+    Route::post('/finance/savings', [SavingsGoalController::class, 'store'])->name('savings.store');
+    Route::put('/finance/savings/{savingsGoal}', [SavingsGoalController::class, 'update'])->name('savings.update');
+    Route::post('/finance/savings/{savingsGoal}/add-funds', [SavingsGoalController::class, 'addFunds'])->name('savings.add-funds');
+    Route::delete('/finance/savings/{savingsGoal}', [SavingsGoalController::class, 'destroy'])->name('savings.destroy');
+
+    Route::resource('finance', TransactionController::class)->parameters(['finance' => 'transaction'])->names('finance');
 
     // Profile
     Route::prefix('profile')->name('profile.')->group(function (): void {

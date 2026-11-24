@@ -53,6 +53,8 @@ class DemoDataSeeder extends Seeder
         $this->seedHabits($user, $today);
         $this->seedExercises($user, $today);
         $this->seedGoals($user);
+        $this->seedBudgets($user, $today);
+        $this->seedSavingsGoals($user);
     }
 
     private function seedCategories(User $user): void
@@ -258,6 +260,73 @@ class DemoDataSeeder extends Seeder
                 'status' => 'in_progress',
                 'target_date' => now()->addMonths(rand(2, 8))->toDateString(),
             ]));
+        }
+    }
+
+    private function seedBudgets(User $user, Carbon $today): void
+    {
+        $currentMonth = $today->format('Y-m');
+
+        // Overall budget limit
+        \App\Models\Budget::updateOrCreate(
+            ['user_id' => $user->id, 'expense_category_id' => null, 'month_year' => $currentMonth],
+            ['amount_limit' => 30000.00, 'alert_threshold_percentage' => 80]
+        );
+
+        $categories = ExpenseCategory::where('user_id', $user->id)->get()->keyBy('name');
+
+        $limits = [
+            'Food' => 8000.00,
+            'Transportation' => 3000.00,
+            'Shopping' => 5000.00,
+            'Entertainment' => 2500.00,
+            'Bills' => 4000.00,
+        ];
+
+        foreach ($limits as $catName => $amount) {
+            if (isset($categories[$catName])) {
+                \App\Models\Budget::updateOrCreate(
+                    ['user_id' => $user->id, 'expense_category_id' => $categories[$catName]->id, 'month_year' => $currentMonth],
+                    ['amount_limit' => $amount, 'alert_threshold_percentage' => 80]
+                );
+            }
+        }
+    }
+
+    private function seedSavingsGoals(User $user): void
+    {
+        $goals = [
+            [
+                'goal_name' => 'Emergency Fund (6 Months)',
+                'target_amount' => 100000.00,
+                'current_saved_amount' => 65000.00,
+                'target_date' => now()->addMonths(5)->toDateString(),
+                'notes' => 'Liquid cash reserve in high-yield savings',
+                'status' => 'active',
+            ],
+            [
+                'goal_name' => 'MacBook Pro M3 Max',
+                'target_amount' => 199000.00,
+                'current_saved_amount' => 199000.00,
+                'target_date' => now()->subDays(10)->toDateString(),
+                'notes' => 'Work productivity workstation upgrade',
+                'status' => 'reached',
+            ],
+            [
+                'goal_name' => 'Japan Spring Trip',
+                'target_amount' => 150000.00,
+                'current_saved_amount' => 55000.00,
+                'target_date' => now()->addMonths(8)->toDateString(),
+                'notes' => 'Cherry blossoms in Kyoto & Tokyo',
+                'status' => 'active',
+            ],
+        ];
+
+        foreach ($goals as $goalData) {
+            \App\Models\SavingsGoal::updateOrCreate(
+                ['user_id' => $user->id, 'goal_name' => $goalData['goal_name']],
+                $goalData
+            );
         }
     }
 }

@@ -154,7 +154,7 @@
                 <div class="section-title">Recent Transactions</div>
                 <div class="section-subtitle">Your latest financial activity</div>
             </div>
-            <a href="#" class="btn btn-sm btn-outline">View All</a>
+            <a href="{{ route('finance.index') }}" class="btn btn-sm btn-outline">View All</a>
         </div>
 
         @if($recentTransactions->isEmpty())
@@ -202,7 +202,7 @@
             <a href="#" class="btn btn-outline" style="justify-content:flex-start;">
                 <i data-lucide="plus-circle" style="width:15px;height:15px;"></i> Add Activity
             </a>
-            <a href="#" class="btn btn-outline" style="justify-content:flex-start;">
+            <a href="{{ route('finance.create', ['type' => 'expense']) }}" class="btn btn-outline" style="justify-content:flex-start;">
                 <i data-lucide="wallet" style="width:15px;height:15px;"></i> Record Expense
             </a>
             <a href="#" class="btn btn-outline" style="justify-content:flex-start;">
