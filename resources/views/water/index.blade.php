@@ -34,7 +34,7 @@
                 <input type="date" name="date" value="{{ $date->toDateString() }}" class="form-control"
                        style="padding:0.35rem 0.65rem;font-size:0.8rem;border-radius:8px;" onchange="this.form.submit()">
             </form>
-            <button onclick="document.getElementById('goalModal').style.display = 'flex'" class="btn btn-outline btn-sm">
+            <button onclick="window.openModal('goalModal')" class="btn btn-outline btn-sm">
                 <i data-lucide="target" style="width:14px;height:14px;"></i> Set Goal
             </button>
         </div>
@@ -190,9 +190,10 @@
             </div>
             <span class="badge badge-green">Last 7 Days</span>
         </div>
-        <div style="height:240px;position:relative;">
-            <canvas id="waterHistoryChart"></canvas>
-        </div>
+    @php $waterChartData = json_encode(['history' => $history, 'goal' => $summary['water_goal_ml']]); @endphp
+    <div style="height:240px;position:relative;">
+        <canvas id="waterHistoryChart" data-chart="water-history" data-chart-data="{!! htmlspecialchars($waterChartData, ENT_QUOTES) !!}"></canvas>
+    </div>
     </div>
 
     {{-- Today's Water Log Entries --}}
@@ -243,11 +244,14 @@
 </div>
 
 {{-- Set Daily Goal Modal --}}
-<div id="goalModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:60;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
-    <div class="card" style="width:100%;max-width:420px;margin:1rem;box-shadow:0 10px 40px rgba(0,0,0,0.15);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
-            <div class="section-title">Set Daily Water Goal</div>
-            <button onclick="document.getElementById('goalModal').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);">
+<div id="goalModal" class="modal-overlay">
+    <div class="modal-card" style="max-width:460px;">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title">Set Daily Water Goal</h3>
+                <p class="modal-subtitle">Personalise your hydration target</p>
+            </div>
+            <button type="button" onclick="window.closeModal('goalModal')" class="modal-close-btn">
                 <i data-lucide="x" style="width:18px;height:18px;"></i>
             </button>
         </div>
@@ -255,22 +259,19 @@
         <form method="POST" action="{{ route('water.update-goal') }}">
             @csrf
             @method('PUT')
-
-            <div class="form-group">
-                <label class="form-label" for="daily_water_goal_ml">Target Water Intake (ml/day)</label>
-                <input type="number" id="daily_water_goal_ml" name="daily_water_goal_ml" class="form-control"
-                       value="{{ $summary['water_goal_ml'] }}" min="500" max="10000" step="100" required>
-                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.35rem;">
-                    Recommended: 2000ml to 3000ml (approx. 8–12 standard glasses per day).
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label required" for="daily_water_goal_ml">Target Water Intake (ml / day)</label>
+                    <input type="number" id="daily_water_goal_ml" name="daily_water_goal_ml" class="form-control"
+                           value="{{ $summary['water_goal_ml'] }}" min="500" max="10000" step="100" required>
+                    <div class="form-hint">Recommended: 2000 – 3000 ml (approx. 8–12 standard glasses per day).</div>
                 </div>
             </div>
 
-            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.25rem;">
-                <button type="button" onclick="document.getElementById('goalModal').style.display='none'" class="btn btn-outline btn-sm">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    Save Goal
+            <div class="modal-footer">
+                <button type="button" onclick="window.closeModal('goalModal')" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="check" style="width:14px;height:14px;"></i> Save Goal
                 </button>
             </div>
         </form>
@@ -278,55 +279,3 @@
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-    // 7-Day Water Intake Chart
-    const waterCtx = document.getElementById('waterHistoryChart').getContext('2d');
-    const waterHistoryData = @json($history);
-    const goalVal = {{ $summary['water_goal_ml'] }};
-
-    new Chart(waterCtx, {
-        type: 'bar',
-        data: {
-            labels: waterHistoryData.map(d => d.label),
-            datasets: [
-                {
-                    label: 'Water Logged (ml)',
-                    data: waterHistoryData.map(d => d.amount),
-                    backgroundColor: 'rgba(59, 130, 246, 0.45)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 1.5,
-                    borderRadius: 6,
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.parsed.y} ml`
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                    ticks: {
-                        font: { size: 11 },
-                        callback: v => v + ' ml'
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 10 } }
-                }
-            }
-        }
-    });
-</script>
-@endpush

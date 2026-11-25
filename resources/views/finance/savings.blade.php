@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        <button onclick="document.getElementById('newGoalModal').style.display = 'flex'" class="btn btn-primary">
+        <button onclick="window.openModal('newGoalModal')" class="btn btn-primary">
             <i data-lucide="plus" style="width:16px;height:16px;"></i> Create New Goal
         </button>
     </div>
@@ -55,7 +55,7 @@
         <i data-lucide="piggy-bank" style="width:48px;height:48px;color:var(--border);margin:0 auto 0.75rem;display:block;"></i>
         <h4 style="font-size:1rem;font-weight:600;color:var(--text);margin:0 0 0.25rem;">No savings goals set yet</h4>
         <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 1rem;">Start saving for an emergency fund, dream vacation, gadget, or future investment.</p>
-        <button onclick="document.getElementById('newGoalModal').style.display = 'flex'" class="btn btn-primary btn-sm">
+        <button onclick="window.openModal('newGoalModal')" class="btn btn-primary btn-sm">
             <i data-lucide="plus" style="width:14px;height:14px;"></i> Create Your First Goal
         </button>
     </div>
@@ -162,56 +162,58 @@
 @endif
 
 {{-- Create Goal Modal --}}
-<div id="newGoalModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:60;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
-    <div class="card" style="width:100%;max-width:440px;margin:1rem;box-shadow:0 10px 40px rgba(0,0,0,0.15);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
-            <div class="section-title">New Savings Goal</div>
-            <button onclick="document.getElementById('newGoalModal').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);">
+<div id="newGoalModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title">New Savings Goal</h3>
+                <p class="modal-subtitle">Set a target, track progress, and reach financial milestones</p>
+            </div>
+            <button type="button" onclick="window.closeModal('newGoalModal')" class="modal-close-btn">
                 <i data-lucide="x" style="width:18px;height:18px;"></i>
             </button>
         </div>
 
         <form method="POST" action="{{ route('savings.store') }}">
             @csrf
-
-            <div class="form-group">
-                <label class="form-label" for="goal_name">Goal Name <span style="color:#DC2626;">*</span></label>
-                <input type="text" id="goal_name" name="goal_name" class="form-control"
-                       placeholder="e.g. Emergency Fund, New Laptop, Holiday" required>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="modal-body">
                 <div class="form-group">
-                    <label class="form-label" for="target_amount">Target Amount (₹) <span style="color:#DC2626;">*</span></label>
-                    <input type="number" id="target_amount" name="target_amount" class="form-control"
-                           step="1" min="1" placeholder="50000" required>
+                    <label class="form-label required" for="goal_name">Goal Name</label>
+                    <input type="text" id="goal_name" name="goal_name" class="form-control"
+                           placeholder="e.g. Emergency Fund, New Laptop, Holiday" required>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" for="target_amount">Target Amount (₹)</label>
+                        <input type="number" id="target_amount" name="target_amount" class="form-control"
+                               step="1" min="1" placeholder="50000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="current_saved_amount">Already Saved (₹)</label>
+                        <input type="number" id="current_saved_amount" name="current_saved_amount" class="form-control"
+                               step="1" min="0" value="0">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="current_saved_amount">Already Saved (₹)</label>
-                    <input type="number" id="current_saved_amount" name="current_saved_amount" class="form-control"
-                           step="1" min="0" value="0">
+                    <label class="form-label" for="target_date">Target Date</label>
+                    <input type="date" id="target_date" name="target_date" class="form-control"
+                           min="{{ now()->toDateString() }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" for="notes">Notes</label>
+                    <textarea id="notes" name="notes" class="form-control" rows="2"
+                              placeholder="Why is this goal important?"></textarea>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="target_date">Target Date</label>
-                <input type="date" id="target_date" name="target_date" class="form-control"
-                       min="{{ now()->toDateString() }}">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="notes">Notes</label>
-                <textarea id="notes" name="notes" class="form-control" rows="2"
-                          placeholder="Why is this goal important?"></textarea>
-            </div>
-
-            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.25rem;">
-                <button type="button" onclick="document.getElementById('newGoalModal').style.display='none'" class="btn btn-outline btn-sm">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    Create Goal
+            <div class="modal-footer">
+                <button type="button" onclick="window.closeModal('newGoalModal')" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="piggy-bank" style="width:14px;height:14px;"></i> Create Goal
                 </button>
             </div>
         </form>
@@ -219,29 +221,32 @@
 </div>
 
 {{-- Add Funds Modal --}}
-<div id="addFundsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:60;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
-    <div class="card" style="width:100%;max-width:380px;margin:1rem;box-shadow:0 10px 40px rgba(0,0,0,0.15);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
-            <div class="section-title" id="addFundsTitle">Deposit Savings</div>
-            <button onclick="document.getElementById('addFundsModal').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);">
+<div id="addFundsModal" class="modal-overlay">
+    <div class="modal-card" style="max-width:420px;">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title" id="addFundsTitle">Deposit Savings</h3>
+                <p class="modal-subtitle">Add funds towards this savings goal</p>
+            </div>
+            <button type="button" onclick="window.closeModal('addFundsModal')" class="modal-close-btn">
                 <i data-lucide="x" style="width:18px;height:18px;"></i>
             </button>
         </div>
 
         <form id="addFundsForm" method="POST" action="">
             @csrf
-
-            <div class="form-group">
-                <label class="form-label" for="deposit_amount">Amount to Deposit (₹) <span style="color:#DC2626;">*</span></label>
-                <input type="number" id="deposit_amount" name="amount" class="form-control"
-                       step="1" min="1" placeholder="e.g. 1000" required autofocus>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label required" for="deposit_amount">Amount to Deposit (₹)</label>
+                    <input type="number" id="deposit_amount" name="amount" class="form-control"
+                           step="1" min="1" placeholder="e.g. 1000" required autofocus>
+                    <div class="form-hint">Enter the amount you want to add to this goal today.</div>
+                </div>
             </div>
 
-            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.25rem;">
-                <button type="button" onclick="document.getElementById('addFundsModal').style.display='none'" class="btn btn-outline btn-sm">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-sage btn-sm">
+            <div class="modal-footer">
+                <button type="button" onclick="window.closeModal('addFundsModal')" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn btn-sage">
                     <i data-lucide="plus" style="width:14px;height:14px;"></i> Deposit Funds
                 </button>
             </div>
@@ -250,11 +255,14 @@
 </div>
 
 {{-- Edit Goal Modal --}}
-<div id="editGoalModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:60;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
-    <div class="card" style="width:100%;max-width:440px;margin:1rem;box-shadow:0 10px 40px rgba(0,0,0,0.15);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
-            <div class="section-title">Edit Savings Goal</div>
-            <button onclick="document.getElementById('editGoalModal').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);">
+<div id="editGoalModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title">Edit Savings Goal</h3>
+                <p class="modal-subtitle">Update the details of your savings goal</p>
+            </div>
+            <button type="button" onclick="window.closeModal('editGoalModal')" class="modal-close-btn">
                 <i data-lucide="x" style="width:18px;height:18px;"></i>
             </button>
         </div>
@@ -262,76 +270,54 @@
         <form id="editGoalForm" method="POST" action="">
             @csrf
             @method('PUT')
-
-            <div class="form-group">
-                <label class="form-label" for="edit_goal_name">Goal Name <span style="color:#DC2626;">*</span></label>
-                <input type="text" id="edit_goal_name" name="goal_name" class="form-control" required>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="modal-body">
                 <div class="form-group">
-                    <label class="form-label" for="edit_target_amount">Target Amount (₹) <span style="color:#DC2626;">*</span></label>
-                    <input type="number" id="edit_target_amount" name="target_amount" class="form-control" step="1" min="1" required>
+                    <label class="form-label required" for="edit_goal_name">Goal Name</label>
+                    <input type="text" id="edit_goal_name" name="goal_name" class="form-control" required>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="edit_current_saved_amount">Current Saved (₹)</label>
-                    <input type="number" id="edit_current_saved_amount" name="current_saved_amount" class="form-control" step="1" min="0">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" for="edit_target_amount">Target Amount (₹)</label>
+                        <input type="number" id="edit_target_amount" name="target_amount" class="form-control" step="1" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit_current_saved_amount">Current Saved (₹)</label>
+                        <input type="number" id="edit_current_saved_amount" name="current_saved_amount" class="form-control" step="1" min="0">
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label" for="edit_target_date">Target Date</label>
+                        <input type="date" id="edit_target_date" name="target_date" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit_status">Status</label>
+                        <select id="edit_status" name="status" class="form-control">
+                            <option value="active">Active</option>
+                            <option value="reached">Reached</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" for="edit_notes">Notes</label>
+                    <textarea id="edit_notes" name="notes" class="form-control" rows="2"></textarea>
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                <div class="form-group">
-                    <label class="form-label" for="edit_target_date">Target Date</label>
-                    <input type="date" id="edit_target_date" name="target_date" class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="edit_status">Status</label>
-                    <select id="edit_status" name="status" class="form-control">
-                        <option value="active">Active</option>
-                        <option value="reached">Reached</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="edit_notes">Notes</label>
-                <textarea id="edit_notes" name="notes" class="form-control" rows="2"></textarea>
-            </div>
-
-            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.25rem;">
-                <button type="button" onclick="document.getElementById('editGoalModal').style.display='none'" class="btn btn-outline btn-sm">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    Update Goal
+            <div class="modal-footer">
+                <button type="button" onclick="window.closeModal('editGoalModal')" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="check" style="width:14px;height:14px;"></i> Update Goal
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-@push('scripts')
-<script>
-    function openAddFundsModal(goalId, goalName) {
-        document.getElementById('addFundsTitle').textContent = `Add Funds to ${goalName}`;
-        document.getElementById('addFundsForm').action = `/finance/savings/${goalId}/add-funds`;
-        document.getElementById('deposit_amount').value = '';
-        document.getElementById('addFundsModal').style.display = 'flex';
-    }
-
-    function openEditGoalModal(goalId, name, target, current, targetDate, notes, status) {
-        document.getElementById('editGoalForm').action = `/finance/savings/${goalId}`;
-        document.getElementById('edit_goal_name').value = name;
-        document.getElementById('edit_target_amount').value = target;
-        document.getElementById('edit_current_saved_amount').value = current;
-        document.getElementById('edit_target_date').value = targetDate;
-        document.getElementById('edit_notes').value = notes;
-        document.getElementById('edit_status').value = status;
-        document.getElementById('editGoalModal').style.display = 'flex';
-    }
-</script>
-@endpush
 @endsection

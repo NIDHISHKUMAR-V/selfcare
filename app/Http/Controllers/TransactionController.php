@@ -89,7 +89,6 @@ class TransactionController extends Controller
         $defaultType = $request->query('type', 'expense');
         $incomeCategories = IncomeCategory::where('user_id', $user->id)->orWhereNull('user_id')->get();
         $expenseCategories = ExpenseCategory::where('user_id', $user->id)->orWhereNull('user_id')->get();
-
         return view('finance.create', [
             'defaultType' => $defaultType,
             'incomeCategories' => $incomeCategories,

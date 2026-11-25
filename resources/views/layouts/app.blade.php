@@ -18,190 +18,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <style>
-        :root {
-            --bg: #F8F7FC;
-            --card: #FFFFFF;
-            --primary: #8E8CD8;
-            --primary-light: #EDE9FE;
-            --sage: #7FA68E;
-            --sage-light: #E8F5ED;
-            --peach: #F4A261;
-            --peach-light: #FEF3E8;
-            --text: #2D2D3A;
-            --text-muted: #6B6B80;
-            --border: #E8E6F0;
-            --sidebar-w: 260px;
-        }
-
-        * { box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-
-        /* ---- Sidebar ---- */
-        .sidebar {
-            width: var(--sidebar-w);
-            background: var(--card);
-            border-right: 1px solid var(--border);
-            height: 100vh;
-            position: fixed;
-            top: 0; left: 0;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            z-index: 50;
-            box-shadow: 2px 0 20px rgba(142,140,216,0.08);
-        }
-        .sidebar-brand {
-            padding: 1.5rem 1.25rem 1rem;
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 0.75rem;
-        }
-        .sidebar-brand .logo-icon {
-            width: 38px; height: 38px;
-            background: linear-gradient(135deg, var(--primary), #A78BFA);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 18px; font-weight: 700;
-        }
-        .sidebar-brand .brand-text h2 { font-size: 0.95rem; font-weight: 700; color: var(--text); line-height: 1.1; }
-        .sidebar-brand .brand-text p { font-size: 0.7rem; color: var(--text-muted); }
-
-        .sidebar-nav { flex: 1; padding: 1rem 0.75rem; }
-        .nav-section-label {
-            font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em;
-            color: var(--text-muted); padding: 0.5rem 0.5rem 0.25rem;
-            text-transform: uppercase;
-        }
-        .nav-link {
-            display: flex; align-items: center; gap: 0.65rem;
-            padding: 0.55rem 0.75rem;
-            border-radius: 10px; color: var(--text-muted);
-            font-size: 0.85rem; font-weight: 500;
-            transition: all 0.15s ease;
-            text-decoration: none; margin-bottom: 2px;
-        }
-        .nav-link:hover { background: var(--primary-light); color: var(--primary); }
-        .nav-link.active { background: var(--primary); color: #fff; }
-        .nav-link.active i { color: #fff; }
-        .nav-link i { width: 16px; height: 16px; }
-
-        .sidebar-footer {
-            padding: 1rem; border-top: 1px solid var(--border);
-        }
-        .sidebar-user {
-            display: flex; align-items: center; gap: 0.65rem;
-            padding: 0.65rem 0.75rem; border-radius: 12px;
-            background: var(--bg); cursor: pointer;
-            text-decoration: none;
-        }
-        .sidebar-user img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
-        .sidebar-user .user-info { flex: 1; overflow: hidden; }
-        .sidebar-user .user-name { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .sidebar-user .user-email { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* ---- Main content ---- */
-        .main-content {
-            margin-left: var(--sidebar-w);
-            min-height: 100vh;
-            display: flex; flex-direction: column;
-        }
-        .topbar {
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
-            padding: 0.9rem 1.75rem;
-            display: flex; align-items: center; justify-content: space-between;
-            position: sticky; top: 0; z-index: 40;
-        }
-        .page-content { padding: 1.75rem; flex: 1; }
-
-        /* ---- Cards ---- */
-        .card {
-            background: var(--card); border-radius: 16px;
-            border: 1px solid var(--border); padding: 1.25rem;
-            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
-        }
-        .stat-card {
-            border-radius: 16px; padding: 1.25rem;
-            border: 1px solid transparent;
-        }
-        .stat-card.lavender { background: var(--primary-light); border-color: #DDD6FE; }
-        .stat-card.sage { background: var(--sage-light); border-color: #BBF7D0; }
-        .stat-card.peach { background: var(--peach-light); border-color: #FED7AA; }
-        .stat-card.pink { background: #FDF2F8; border-color: #FBCFE8; }
-        .stat-card.blue { background: #EFF6FF; border-color: #BFDBFE; }
-
-        .stat-icon {
-            width: 44px; height: 44px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 0.75rem;
-        }
-        .stat-icon.purple { background: var(--primary); color: #fff; }
-        .stat-icon.green { background: var(--sage); color: #fff; }
-        .stat-icon.orange { background: var(--peach); color: #fff; }
-        .stat-icon.pink { background: #EC4899; color: #fff; }
-        .stat-icon.blue { background: #3B82F6; color: #fff; }
-
-        .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1.1; }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
-        .stat-change { font-size: 0.72rem; font-weight: 500; margin-top: 0.4rem; }
-
-        /* Progress bar */
-        .progress-bar { height: 8px; border-radius: 999px; background: #E8E6F0; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
-
-        /* Mobile toggle */
-        .mobile-nav-toggle {
-            display: none;
-            background: none; border: none; cursor: pointer; padding: 0.4rem;
-            border-radius: 8px; color: var(--text);
-        }
-        .sidebar-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.3); z-index: 45;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-            .sidebar-overlay.open { display: block; }
-            .main-content { margin-left: 0; }
-            .mobile-nav-toggle { display: flex; align-items: center; }
-            .topbar { padding: 0.75rem 1rem; }
-            .page-content { padding: 1rem; }
-        }
-
-        /* Notifications / alerts */
-        .alert {
-            padding: 0.8rem 1rem; border-radius: 10px;
-            display: flex; align-items: flex-start; gap: 0.65rem;
-            font-size: 0.84rem; margin-bottom: 1rem;
-        }
-        .alert-success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
-        .alert-error { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
-
-        /* Badges */
-        .badge { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
-        .badge-purple { background: var(--primary-light); color: var(--primary); }
-        .badge-green { background: var(--sage-light); color: var(--sage); }
-        .badge-orange { background: var(--peach-light); color: #C2500C; }
-        .badge-red { background: #FEF2F2; color: #DC2626; }
-
-        /* Buttons */
-        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border-radius: 10px; font-size: 0.84rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s ease; text-decoration: none; }
-        .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover { background: #7c6fd4; color: #fff; }
-        .btn-sage { background: var(--sage); color: #fff; }
-        .btn-sage:hover { background: #6b9079; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-        .btn-outline:hover { background: var(--bg); }
-        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
-
-        /* Section header */
-        .section-title { font-size: 1rem; font-weight: 700; color: var(--text); }
-        .section-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 1px; }
-    </style>
 </head>
 <body class="h-full">
 
@@ -252,33 +68,30 @@
         </a>
 
         <div class="nav-section-label" style="margin-top:0.75rem;">Daily Life</div>
-        <a href="#" class="nav-link {{ request()->routeIs('activities.*') ? 'active' : '' }}">
+        <a href="{{ route('activities.index') }}" class="nav-link {{ request()->routeIs('activities.*') ? 'active' : '' }}">
             <i data-lucide="list-checks"></i> Daily Activities
         </a>
-        <a href="#" class="nav-link {{ request()->routeIs('habits.*') ? 'active' : '' }}">
+        <a href="{{ route('habits.index') }}" class="nav-link {{ request()->routeIs('habits.*') ? 'active' : '' }}">
             <i data-lucide="repeat"></i> Habit Tracker
         </a>
-        <a href="#" class="nav-link {{ request()->routeIs('exercise.*') ? 'active' : '' }}">
+        <a href="{{ route('exercise.index') }}" class="nav-link {{ request()->routeIs('exercise.*') ? 'active' : '' }}">
             <i data-lucide="dumbbell"></i> Exercise Tracker
         </a>
-        <a href="#" class="nav-link {{ request()->routeIs('sleep.*') ? 'active' : '' }}">
+        <a href="{{ route('sleep.index') }}" class="nav-link {{ request()->routeIs('sleep.*') ? 'active' : '' }}">
             <i data-lucide="moon"></i> Sleep Tracker
         </a>
 
         <div class="nav-section-label" style="margin-top:0.75rem;">Growth</div>
-        <a href="#" class="nav-link {{ request()->routeIs('goals.*') ? 'active' : '' }}">
+        <a href="{{ route('goals.index') }}" class="nav-link {{ request()->routeIs('goals.*') ? 'active' : '' }}">
             <i data-lucide="target"></i> Goals
         </a>
-        <a href="#" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+        <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
             <i data-lucide="bar-chart-2"></i> Reports
         </a>
 
         <div class="nav-section-label" style="margin-top:0.75rem;">Account</div>
         <a href="{{ route('profile.show') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <i data-lucide="user"></i> Profile
-        </a>
-        <a href="#" class="nav-link">
-            <i data-lucide="settings"></i> Settings
         </a>
     </nav>
 
@@ -349,33 +162,6 @@
         @yield('content')
     </main>
 </div>
-
-<script>
-    // Init Lucide icons
-    lucide.createIcons();
-
-    // Mobile sidebar
-    function openSidebar() {
-        document.getElementById('sidebar').classList.add('open');
-        document.getElementById('sidebarOverlay').classList.add('open');
-    }
-    function closeSidebar() {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('open');
-    }
-
-    // Auto-dismiss flash messages after 5s
-    setTimeout(() => {
-        const flash = document.getElementById('flashMessages');
-        if (flash) {
-            flash.querySelectorAll('.alert').forEach(el => {
-                el.style.opacity = '0';
-                el.style.transition = 'opacity 0.5s';
-                setTimeout(() => el.remove(), 500);
-            });
-        }
-    }, 5000);
-</script>
 
 @stack('scripts')
 </body>

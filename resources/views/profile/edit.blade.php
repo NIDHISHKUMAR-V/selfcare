@@ -145,17 +145,4 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-function previewAvatar(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('avatarPreview').src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-</script>
-@endpush
 @endsection

@@ -1,15 +1,21 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\FinanceReportController;
 use App\Http\Controllers\FoodLogController;
+use App\Http\Controllers\HabitController;
+use App\Http\Controllers\OverallReportController;
+use App\Http\Controllers\PersonalGoalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SavingsGoalController;
+use App\Http\Controllers\SleepLogController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WaterLogController;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +81,28 @@ Route::middleware('auth')->group(function (): void {
     Route::delete('/finance/savings/{savingsGoal}', [SavingsGoalController::class, 'destroy'])->name('savings.destroy');
 
     Route::resource('finance', TransactionController::class)->parameters(['finance' => 'transaction'])->names('finance');
+
+    // Phase 4: Daily Activity, Habit, Exercise & Sleep Tracking Routes
+    Route::post('/activities/{activity}/toggle', [ActivityController::class, 'toggleStatus'])->name('activities.toggle');
+    Route::resource('activities', ActivityController::class)->except(['create', 'show']);
+
+    Route::post('/habits/{habit}/toggle', [HabitController::class, 'toggle'])->name('habits.toggle');
+    Route::resource('habits', HabitController::class)->except(['create', 'show', 'edit']);
+
+    Route::resource('exercise', ExerciseController::class)->except(['create', 'show', 'edit']);
+
+    Route::resource('sleep', SleepLogController::class)
+        ->parameters(['sleep' => 'sleepLog'])
+        ->except(['create', 'show', 'edit']);
+
+    // Phase 5: Personal Goals & Milestones
+    Route::post('/goals/{goal}/milestones', [PersonalGoalController::class, 'addMilestone'])->name('goals.milestones.store');
+    Route::post('/goals/milestones/{milestone}/toggle', [PersonalGoalController::class, 'toggleMilestone'])->name('goals.milestones.toggle');
+    Route::delete('/goals/milestones/{milestone}', [PersonalGoalController::class, 'destroyMilestone'])->name('goals.milestones.destroy');
+    Route::resource('goals', PersonalGoalController::class)->except(['create', 'edit']);
+
+    // Phase 6: Life Reports & Analytics
+    Route::get('/reports', [OverallReportController::class, 'index'])->name('reports.index');
 
     // Profile
     Route::prefix('profile')->name('profile.')->group(function (): void {

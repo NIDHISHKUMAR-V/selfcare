@@ -62,6 +62,28 @@
     </div>
 </div>
 
+@php
+    $monthsTrend = $chartsData['months_trend'];
+    $financeTrendJson = json_encode([
+        'labels' => array_column($monthsTrend, 'label'),
+        'income' => array_column($monthsTrend, 'income'),
+        'expense' => array_column($monthsTrend, 'expense'),
+    ]);
+
+    $categoryDist = $chartsData['category_distribution'];
+    $categoryDistJson = json_encode([
+        'labels' => $categoryDist['labels'] ?? [],
+        'data' => $categoryDist['data'] ?? [],
+        'colors' => $categoryDist['colors'] ?? [],
+    ]);
+
+    $dailyExpenses = $chartsData['daily_expenses'];
+    $dailyExpenseJson = json_encode([
+        'labels' => array_column($dailyExpenses, 'day'),
+        'data' => array_column($dailyExpenses, 'amount'),
+    ]);
+@endphp
+
 {{-- Charts Row 1: 6-Month Income vs Expenses & Category Doughnut --}}
 <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
 
@@ -75,7 +97,7 @@
             <span class="badge badge-purple">Last 6 Months</span>
         </div>
         <div style="height:270px;position:relative;">
-            <canvas id="incomeExpenseChart"></canvas>
+            <canvas id="incomeExpenseChart" data-chart="finance-income-expense" data-chart-data="{!! htmlspecialchars($financeTrendJson, ENT_QUOTES) !!}"></canvas>
         </div>
     </div>
 
@@ -93,7 +115,7 @@
             </div>
         @else
             <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;">
-                <canvas id="categoryChart" style="max-height:220px;"></canvas>
+                <canvas id="categoryChart" data-chart="finance-category-spending" data-chart-data="{!! htmlspecialchars($categoryDistJson, ENT_QUOTES) !!}" style="max-height:220px;"></canvas>
             </div>
         @endif
     </div>
@@ -110,7 +132,7 @@
         <span class="badge badge-orange">Daily Spend</span>
     </div>
     <div style="height:220px;position:relative;">
-        <canvas id="dailyExpenseChart"></canvas>
+        <canvas id="dailyExpenseChart" data-chart="finance-daily-expense" data-chart-data="{!! htmlspecialchars($dailyExpenseJson, ENT_QUOTES) !!}"></canvas>
     </div>
 </div>
 
@@ -162,140 +184,3 @@
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-    // 1. Multi-Month Income vs Expense Bar Chart
-    const trendCtx = document.getElementById('incomeExpenseChart').getContext('2d');
-    const trendData = @json($chartsData['months_trend']);
-
-    new Chart(trendCtx, {
-        type: 'bar',
-        data: {
-            labels: trendData.map(d => d.label),
-            datasets: [
-                {
-                    label: 'Income',
-                    data: trendData.map(d => d.income),
-                    backgroundColor: 'rgba(127, 166, 142, 0.6)',
-                    borderColor: '#7FA68E',
-                    borderWidth: 1.5,
-                    borderRadius: 6,
-                },
-                {
-                    label: 'Expense',
-                    data: trendData.map(d => d.expense),
-                    backgroundColor: 'rgba(244, 162, 97, 0.6)',
-                    borderColor: '#F4A261',
-                    borderWidth: 1.5,
-                    borderRadius: 6,
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ` ${ctx.dataset.label}: ₹${ctx.parsed.y.toLocaleString('en-IN')}`
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                    ticks: {
-                        callback: v => '₹' + v.toLocaleString('en-IN')
-                    }
-                },
-                x: {
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-
-    // 2. Category Spending Doughnut Chart
-    @if(!empty($chartsData['category_distribution']['labels']))
-        const catCtx = document.getElementById('categoryChart').getContext('2d');
-        const catData = @json($chartsData['category_distribution']);
-
-        new Chart(catCtx, {
-            type: 'doughnut',
-            data: {
-                labels: catData.labels,
-                datasets: [{
-                    data: catData.data,
-                    backgroundColor: catData.colors,
-                    borderColor: '#ffffff',
-                    borderWidth: 2,
-                    hoverOffset: 4,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { boxWidth: 10, font: { size: 10 } }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` ${ctx.label}: ₹${ctx.parsed.toLocaleString('en-IN')}`
-                        }
-                    }
-                },
-                cutout: '62%',
-            }
-        });
-    @endif
-
-    // 3. Daily Expense Trend Chart
-    const dailyCtx = document.getElementById('dailyExpenseChart').getContext('2d');
-    const dailyData = @json($chartsData['daily_expenses']);
-
-    new Chart(dailyCtx, {
-        type: 'bar',
-        data: {
-            labels: dailyData.map(d => d.day),
-            datasets: [{
-                label: 'Expense (₹)',
-                data: dailyData.map(d => d.amount),
-                backgroundColor: 'rgba(244, 162, 97, 0.5)',
-                borderColor: '#F4A261',
-                borderWidth: 1,
-                borderRadius: 4,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ` ₹${ctx.parsed.y.toLocaleString('en-IN')}`
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                    ticks: {
-                        callback: v => '₹' + v
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 10 }, maxRotation: 45 }
-                }
-            }
-        }
-    });
-</script>
-@endpush

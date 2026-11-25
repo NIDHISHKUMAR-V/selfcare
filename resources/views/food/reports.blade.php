@@ -77,6 +77,14 @@
 </div>
 
 {{-- Charts Section --}}
+@php
+    $trendData = $report['daily_calorie_trend'];
+    $foodTrendJson = json_encode([
+        'labels' => array_column($trendData, 'label'),
+        'data' => array_column($trendData, 'calories'),
+    ]);
+    $foodMacroJson = json_encode($report['macro_breakdown']);
+@endphp
 <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;margin-bottom:1.5rem;">
 
     {{-- Daily Calorie Trend Bar Chart --}}
@@ -89,7 +97,7 @@
             <span class="badge badge-purple">{{ ucfirst($period) }}</span>
         </div>
         <div style="height:280px;position:relative;">
-            <canvas id="dailyCalorieTrendChart"></canvas>
+            <canvas id="dailyCalorieTrendChart" data-chart="food-calorie-trend" data-chart-data="{!! htmlspecialchars($foodTrendJson, ENT_QUOTES) !!}"></canvas>
         </div>
     </div>
 
@@ -101,7 +109,7 @@
         </div>
 
         <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;">
-            <canvas id="macroDonutChart" style="max-height:200px;"></canvas>
+            <canvas id="macroDonutChart" data-chart="food-macro-donut" data-chart-data="{!! htmlspecialchars($foodMacroJson, ENT_QUOTES) !!}" style="max-height:200px;"></canvas>
         </div>
 
         <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.75rem;display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;text-align:center;">
@@ -183,87 +191,3 @@
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-    // 1. Daily Calorie Trend Bar Chart
-    const trendCtx = document.getElementById('dailyCalorieTrendChart').getContext('2d');
-    const trendData = @json($report['daily_calorie_trend']);
-    const avgCalories = {{ $report['average_daily_calories'] }};
-
-    new Chart(trendCtx, {
-        type: 'bar',
-        data: {
-            labels: trendData.map(d => d.label),
-            datasets: [{
-                label: 'Calories',
-                data: trendData.map(d => d.calories),
-                backgroundColor: 'rgba(142, 140, 216, 0.45)',
-                borderColor: 'rgba(142, 140, 216, 1)',
-                borderWidth: 1.5,
-                borderRadius: 6,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.parsed.y.toFixed(0)} kcal`
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                    ticks: {
-                        font: { size: 11 },
-                        callback: v => v + ' kcal'
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 10 }, maxRotation: 45 }
-                }
-            }
-        }
-    });
-
-    // 2. Macronutrient Breakdown Donut Chart
-    const donutCtx = document.getElementById('macroDonutChart').getContext('2d');
-    const macroData = @json($report['macro_breakdown']);
-
-    new Chart(donutCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Protein', 'Carbohydrates', 'Fat'],
-            datasets: [{
-                data: [macroData.protein || 1, macroData.carbs || 1, macroData.fat || 1],
-                backgroundColor: ['#7FA68E', '#F4A261', '#EC4899'],
-                borderWidth: 2,
-                borderColor: '#ffffff',
-                hoverOffset: 4,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { boxWidth: 12, font: { size: 11 } }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ` ${ctx.label}: ${ctx.parsed}%`
-                    }
-                }
-            },
-            cutout: '65%',
-        }
-    });
-</script>
-@endpush

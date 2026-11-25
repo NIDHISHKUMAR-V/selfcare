@@ -6,9 +6,12 @@
 
 @section('content')
 <div style="max-width:760px;margin:0 auto;">
-    <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
-            <div class="section-title">Edit {{ ucfirst($transaction->type) }} Entry</div>
+    <div class="card" style="padding:1.75rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+            <div>
+                <h2 class="section-title" style="font-size:1.15rem;">Edit {{ ucfirst($transaction->type) }} Entry</h2>
+                <p class="section-subtitle">Keep your financial records accurate</p>
+            </div>
             <a href="{{ route('finance.index') }}" class="btn btn-outline btn-sm">
                 <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Ledger
             </a>
@@ -31,63 +34,57 @@
             @csrf
             @method('PUT')
 
-            {{-- Type (Hidden, or displayed as badge) --}}
             <input type="hidden" name="type" value="{{ $transaction->type }}">
 
-            <div style="margin-bottom:1.25rem;">
-                <span class="badge" style="font-size:0.85rem;padding:0.35rem 0.75rem;background:{{ $transaction->type === 'income' ? 'var(--sage-light)' : 'var(--peach-light)' }};color:{{ $transaction->type === 'income' ? 'var(--sage)' : '#C2500C' }};">
+            <div style="margin-bottom:1.5rem;">
+                <span class="badge" style="font-size:0.85rem;padding:0.4rem 0.85rem;background:{{ $transaction->type === 'income' ? '#DCFCE7' : '#FEE2E2' }};color:{{ $transaction->type === 'income' ? '#16A34A' : '#DC2626' }};">
+                    <i data-lucide="{{ $transaction->type === 'income' ? 'arrow-down-left' : 'arrow-up-right' }}" style="width:15px;height:15px;"></i>
                     {{ ucfirst($transaction->type) }} Transaction
                 </span>
             </div>
 
-            {{-- Title & Amount --}}
-            <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;">
+            <div class="form-grid-2">
+                {{-- Title --}}
                 <div class="form-group">
-                    <label class="form-label" for="title">Transaction Title <span style="color:#DC2626;">*</span></label>
+                    <label class="form-label required" for="title">Transaction Title</label>
                     <input type="text" id="title" name="title" class="form-control"
                            value="{{ old('title', $transaction->title) }}" required autofocus>
                 </div>
 
+                {{-- Amount --}}
                 <div class="form-group">
-                    <label class="form-label" for="amount">Amount (₹) <span style="color:#DC2626;">*</span></label>
+                    <label class="form-label required" for="amount">Amount ($)</label>
                     <input type="number" id="amount" name="amount" class="form-control"
                            step="0.01" min="0.01" value="{{ old('amount', $transaction->amount) }}" required>
                 </div>
             </div>
 
-            {{-- Category & Payment Method --}}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                @if($transaction->type === 'expense')
-                    <div class="form-group">
-                        <label class="form-label" for="expense_category_id">Expense Category <span style="color:#DC2626;">*</span></label>
-                        <select id="expense_category_id" name="expense_category_id" class="form-control">
-                            <option value="">Select Category</option>
-                            @foreach($expenseCategories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('expense_category_id', $transaction->expense_category_id) == $cat->id ? 'selected' : '' }}>
-                                    {{ $cat->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                @else
-                    <div class="form-group">
-                        <label class="form-label" for="income_category_id">Income Source / Category <span style="color:#DC2626;">*</span></label>
-                        <select id="income_category_id" name="income_category_id" class="form-control">
-                            <option value="">Select Category</option>
-                            @foreach($incomeCategories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('income_category_id', $transaction->income_category_id) == $cat->id ? 'selected' : '' }}>
-                                    {{ $cat->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                @endif
+            {{-- Category --}}
+            <div class="form-group">
+                <label class="form-label required" for="category_id">Category</label>
+                <select id="category_id" name="category_id" class="form-control" required>
+                    @php $categories = $transaction->type === 'income' ? $incomeCategories : $expenseCategories; @endphp
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}" {{ old('category_id', $transaction->category_id) == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="form-grid-2">
+                {{-- Transaction Date --}}
+                <div class="form-group">
+                    <label class="form-label required" for="transaction_date">Date</label>
+                    <input type="date" id="transaction_date" name="transaction_date" class="form-control"
+                           value="{{ old('transaction_date', $transaction->transaction_date->toDateString()) }}" required>
+                </div>
 
                 {{-- Payment Method --}}
                 <div class="form-group">
-                    <label class="form-label" for="payment_method">Payment Method <span style="color:#DC2626;">*</span></label>
-                    <select id="payment_method" name="payment_method" class="form-control" required>
-                        @foreach(['Cash', 'Card', 'UPI', 'Bank Transfer', 'Digital Wallet', 'Other'] as $method)
+                    <label class="form-label" for="payment_method">Payment Method</label>
+                    <select id="payment_method" name="payment_method" class="form-control">
+                        @foreach(['Credit Card', 'Debit Card', 'Cash', 'Bank Transfer', 'UPI / Digital Wallet', 'Other'] as $method)
                             <option value="{{ $method }}" {{ old('payment_method', $transaction->payment_method) === $method ? 'selected' : '' }}>
                                 {{ $method }}
                             </option>
@@ -96,70 +93,34 @@
                 </div>
             </div>
 
-            {{-- Date & Receipt --}}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                <div class="form-group">
-                    <label class="form-label" for="transaction_date">Transaction Date <span style="color:#DC2626;">*</span></label>
-                    <input type="date" id="transaction_date" name="transaction_date" class="form-control"
-                           value="{{ old('transaction_date', $transaction->transaction_date->toDateString()) }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Receipt Photo / Document</label>
-                    @if($transaction->receipt_path)
-                        <div style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;">
-                            <a href="{{ Storage::disk('public')->url($transaction->receipt_path) }}" target="_blank" class="btn btn-outline btn-sm">
-                                <i data-lucide="eye" style="width:13px;height:13px;"></i> View Current Receipt
-                            </a>
-                        </div>
-                    @endif
-                    <div style="display:flex;align-items:center;gap:0.75rem;">
-                        <label for="receipt" class="btn btn-outline btn-sm" style="cursor:pointer;">
-                            <i data-lucide="upload" style="width:14px;height:14px;"></i> {{ $transaction->receipt_path ? 'Replace Receipt' : 'Upload Receipt' }}
-                        </label>
-                        <input type="file" id="receipt" name="receipt" accept="image/*,application/pdf" style="display:none;" onchange="previewReceipt(this)">
-                        <span id="receiptFileName" style="font-size:0.75rem;color:var(--text-muted);">Max 3MB</span>
-                    </div>
+            {{-- Receipt Upload --}}
+            <div class="form-group">
+                <label class="form-label">Receipt Image</label>
+                <label for="receipt" class="image-upload-dropzone" style="display:block;">
+                    <i data-lucide="receipt" class="upload-icon"></i>
+                    <div class="upload-text">Click to replace receipt image</div>
+                    <div class="upload-subtext" id="receiptFileName">PNG, JPG, or PDF up to 4MB</div>
+                    <input type="file" id="receipt" name="receipt" accept="image/*,.pdf" style="display:none;"
+                           onchange="window.SelfCare.previewImage(this, 'receiptPreviewImg')">
+                </label>
+                <div style="margin-top:0.75rem;text-align:center;">
+                    <img id="receiptPreviewImg" src="{{ $transaction->receipt_url ?: '' }}" alt="Receipt Preview" style="{{ $transaction->receipt_url ? 'display:block;' : 'display:none;' }}max-height:160px;margin:0 auto;border-radius:12px;border:1px solid var(--border);">
                 </div>
             </div>
 
             {{-- Notes --}}
             <div class="form-group">
-                <label class="form-label" for="notes">Notes & Remarks</label>
+                <label class="form-label" for="notes">Notes / Memo</label>
                 <textarea id="notes" name="notes" class="form-control" rows="2">{{ old('notes', $transaction->notes) }}</textarea>
             </div>
 
-            <div id="receiptPreviewBox" style="display:none;margin-bottom:1rem;">
-                <img id="receiptPreviewImg" src="" alt="Receipt Preview" style="max-height:120px;border-radius:10px;border:1px solid var(--border);">
-            </div>
-
-            <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+            <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">
                 <a href="{{ route('finance.index') }}" class="btn btn-outline">Cancel</a>
-                <button type="submit" class="btn btn-primary" style="padding-left:1.5rem;padding-right:1.5rem;">
-                    <i data-lucide="save" style="width:14px;height:14px;"></i> Update Transaction
+                <button type="submit" class="btn btn-primary" style="padding:0.6rem 1.75rem;">
+                    <i data-lucide="check" style="width:15px;height:15px;"></i> Update Transaction
                 </button>
             </div>
         </form>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    function previewReceipt(input) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            document.getElementById('receiptFileName').textContent = file.name;
-
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('receiptPreviewImg').src = e.target.result;
-                    document.getElementById('receiptPreviewBox').style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-    }
-</script>
-@endpush
 @endsection

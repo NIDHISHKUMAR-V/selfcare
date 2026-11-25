@@ -163,11 +163,14 @@
 </div>
 
 {{-- Set/Edit Budget Modal --}}
-<div id="budgetModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:60;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
-    <div class="card" style="width:100%;max-width:440px;margin:1rem;box-shadow:0 10px 40px rgba(0,0,0,0.15);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
-            <div class="section-title" id="budgetModalTitle">Set Budget Limit</div>
-            <button onclick="document.getElementById('budgetModal').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);">
+<div id="budgetModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title" id="budgetModalTitle">Set Budget Limit</h3>
+                <p class="modal-subtitle">Control monthly spending limits and warnings</p>
+            </div>
+            <button type="button" onclick="window.closeModal('budgetModal')" class="modal-close-btn">
                 <i data-lucide="x" style="width:18px;height:18px;"></i>
             </button>
         </div>
@@ -177,44 +180,28 @@
             <input type="hidden" name="month_year" value="{{ $currentMonth }}">
             <input type="hidden" name="expense_category_id" id="modal_category_id" value="">
 
-            <div class="form-group">
-                <label class="form-label" for="modal_amount_limit">Amount Limit (₹) <span style="color:#DC2626;">*</span></label>
-                <input type="number" id="modal_amount_limit" name="amount_limit" class="form-control"
-                       step="1" min="1" placeholder="e.g. 5000" required>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label required" for="modal_amount_limit">Amount Limit ($)</label>
+                    <input type="number" id="modal_amount_limit" name="amount_limit" class="form-control"
+                           step="1" min="1" placeholder="e.g. 500" required autofocus>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" for="modal_alert_threshold">Warning Alert Threshold (%)</label>
+                    <input type="number" id="modal_alert_threshold" name="alert_threshold_percentage" class="form-control"
+                           min="10" max="100" value="80">
+                    <div class="form-hint">
+                        Show a warning badge when spending reaches this percentage of the limit (default 80%).
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="modal_alert_threshold">Warning Alert Threshold (%)</label>
-                <input type="number" id="modal_alert_threshold" name="alert_threshold_percentage" class="form-control"
-                       min="10" max="100" value="80">
-                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">
-                    Show a warning badge when spending reaches this percentage of the limit (default 80%).
-                </p>
-            </div>
-
-            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.25rem;">
-                <button type="button" onclick="document.getElementById('budgetModal').style.display='none'" class="btn btn-outline btn-sm">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    Save Budget Limit
-                </button>
+            <div class="modal-footer">
+                <button type="button" onclick="window.closeModal('budgetModal')" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Budget Limit</button>
             </div>
         </form>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    function openBudgetModal(catId, catName, currentLimit, threshold) {
-        document.getElementById('modal_category_id').value = catId ? catId : '';
-        document.getElementById('modal_amount_limit').value = currentLimit ? currentLimit : '';
-        document.getElementById('modal_alert_threshold').value = threshold ? threshold : 80;
-
-        const title = catName ? `Set Limit for ${catName}` : 'Set Overall Monthly Budget Limit';
-        document.getElementById('budgetModalTitle').textContent = title;
-        document.getElementById('budgetModal').style.display = 'flex';
-    }
-</script>
-@endpush
 @endsection

@@ -5,10 +5,13 @@
 @section('page-subtitle', 'Update food record and nutritional information')
 
 @section('content')
-<div style="max-width:800px;margin:0 auto;">
-    <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
-            <div class="section-title">Edit Food Record</div>
+<div style="max-width:760px;margin:0 auto;">
+    <div class="card" style="padding:1.75rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+            <div>
+                <h2 class="section-title" style="font-size:1.15rem;">Edit Food Record</h2>
+                <p class="section-subtitle">Modify portion, calories, or meal category</p>
+            </div>
             <a href="{{ route('food.index', ['date' => $foodLog->meal_date->toDateString()]) }}" class="btn btn-outline btn-sm">
                 <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Food Log
             </a>
@@ -32,30 +35,37 @@
             @method('PUT')
 
             {{-- Meal Type Selection --}}
-            <div class="form-group" style="margin-bottom:1.25rem;">
-                <label class="form-label">Meal Type</label>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;">
-                    @foreach(['breakfast' => 'Breakfast', 'lunch' => 'Lunch', 'dinner' => 'Dinner', 'snack' => 'Snack'] as $type => $label)
-                        <label style="cursor:pointer;">
-                            <input type="radio" name="meal_type" value="{{ $type }}"
-                                   {{ old('meal_type', $foodLog->meal_type) === $type ? 'checked' : '' }} style="display:none;"
-                                   onchange="updateMealSelection(this)">
-                            <div class="meal-type-badge {{ old('meal_type', $foodLog->meal_type) === $type ? 'selected' : '' }}"
-                                 id="badge_{{ $type }}"
-                                 style="padding:0.6rem;text-align:center;border-radius:10px;border:1.5px solid var(--border);font-size:0.85rem;font-weight:600;transition:all 0.15s ease;">
-                                {{ $label }}
+            <div class="form-group" style="margin-bottom:1.5rem;">
+                <label class="form-label required">Meal Category</label>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;">
+                    @php
+                        $mealTypes = [
+                            'breakfast' => ['label' => 'Breakfast', 'icon' => 'sun'],
+                            'lunch'     => ['label' => 'Lunch', 'icon' => 'utensils'],
+                            'dinner'    => ['label' => 'Dinner', 'icon' => 'moon'],
+                            'snack'     => ['label' => 'Snack', 'icon' => 'apple'],
+                        ];
+                    @endphp
+                    @foreach($mealTypes as $type => $info)
+                        <label style="cursor:pointer;position:relative;">
+                            <input type="radio" name="meal_type" value="{{ $type }}" class="meal-type-radio"
+                                   {{ old('meal_type', $foodLog->meal_type) === $type ? 'checked' : '' }} style="position:absolute;opacity:0;"
+                                   onchange="window.updateMealSelection(this)">
+                            <div class="meal-card-selector {{ old('meal_type', $foodLog->meal_type) === $type ? 'selected' : '' }}" style="padding:0.75rem 0.5rem;text-align:center;border-radius:12px;border:1.5px solid var(--border);transition:all 0.15s ease;display:flex;flex-direction:column;align-items:center;gap:0.35rem;background:#FAF9FD;">
+                                <i data-lucide="{{ $info['icon'] }}" style="width:18px;height:18px;"></i>
+                                <span style="font-size:0.82rem;font-weight:600;">{{ $info['label'] }}</span>
                             </div>
                         </label>
                     @endforeach
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;">
+            <div class="form-grid-2">
                 {{-- Food Item Name --}}
                 <div class="form-group">
-                    <label class="form-label" for="food_name">Food Item Name <span style="color:#DC2626;">*</span></label>
-                    <input type="text" id="food_name" name="food_name" class="form-control {{ $errors->has('food_name') ? 'is-invalid' : '' }}"
-                           value="{{ old('food_name', $foodLog->food_name) }}" required autofocus>
+                    <label class="form-label required" for="food_name">Food Name</label>
+                    <input type="text" id="food_name" name="food_name" class="form-control"
+                           value="{{ old('food_name', $foodLog->food_name) }}" required>
                 </div>
 
                 {{-- Serving Size --}}
@@ -67,28 +77,28 @@
             </div>
 
             {{-- Quantity & Calories --}}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-grid-2">
                 <div class="form-group">
-                    <label class="form-label" for="quantity">Quantity <span style="color:#DC2626;">*</span></label>
-                    <input type="number" id="quantity" name="quantity" class="form-control {{ $errors->has('quantity') ? 'is-invalid' : '' }}"
+                    <label class="form-label required" for="quantity">Quantity / Servings</label>
+                    <input type="number" id="quantity" name="quantity" class="form-control"
                            step="0.1" min="0.1" value="{{ old('quantity', $foodLog->quantity) }}" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="calories">Calories (kcal) <span style="color:#DC2626;">*</span></label>
-                    <input type="number" id="calories" name="calories" class="form-control {{ $errors->has('calories') ? 'is-invalid' : '' }}"
+                    <label class="form-label required" for="calories">Calories (kcal)</label>
+                    <input type="number" id="calories" name="calories" class="form-control"
                            step="1" min="0" value="{{ old('calories', $foodLog->calories) }}" required>
                 </div>
             </div>
 
             {{-- Macronutrients: Protein, Carbs, Fat --}}
-            <div style="background:var(--bg);padding:1rem;border-radius:12px;margin-bottom:1rem;border:1px solid var(--border);">
-                <div style="font-size:0.8rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem;">
-                    <i data-lucide="activity" style="width:14px;height:14px;color:var(--primary);"></i>
-                    Macronutrients (in grams)
+            <div style="background:#FAF9FD;padding:1.25rem;border-radius:14px;margin-bottom:1.25rem;border:1px solid var(--border);">
+                <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem;">
+                    <i data-lucide="pie-chart" style="width:16px;height:16px;color:var(--primary);"></i>
+                    Macronutrients (Optional, grams)
                 </div>
 
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+                <div class="form-grid-3">
                     <div class="form-group" style="margin:0;">
                         <label class="form-label" for="protein" style="color:var(--sage);">Protein (g)</label>
                         <input type="number" id="protein" name="protein" class="form-control"
@@ -96,13 +106,13 @@
                     </div>
 
                     <div class="form-group" style="margin:0;">
-                        <label class="form-label" for="carbohydrates" style="color:#C2500C;">Carbohydrates (g)</label>
+                        <label class="form-label" for="carbohydrates" style="color:var(--peach);">Carbs (g)</label>
                         <input type="number" id="carbohydrates" name="carbohydrates" class="form-control"
                                step="0.1" min="0" value="{{ old('carbohydrates', $foodLog->carbohydrates) }}">
                     </div>
 
                     <div class="form-group" style="margin:0;">
-                        <label class="form-label" for="fat" style="color:#EC4899;">Fat (g)</label>
+                        <label class="form-label" for="fat" style="color:#EC4899;">Fats (g)</label>
                         <input type="number" id="fat" name="fat" class="form-control"
                                step="0.1" min="0" value="{{ old('fat', $foodLog->fat) }}">
                     </div>
@@ -110,9 +120,9 @@
             </div>
 
             {{-- Date & Time --}}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-grid-2">
                 <div class="form-group">
-                    <label class="form-label" for="meal_date">Meal Date <span style="color:#DC2626;">*</span></label>
+                    <label class="form-label required" for="meal_date">Meal Date</label>
                     <input type="date" id="meal_date" name="meal_date" class="form-control"
                            value="{{ old('meal_date', $foodLog->meal_date->toDateString()) }}" required>
                 </div>
@@ -124,72 +134,33 @@
                 </div>
             </div>
 
-            {{-- Food Image Upload --}}
+            {{-- Food Image Upload Dropzone --}}
             <div class="form-group">
                 <label class="form-label">Food Photo</label>
-                @if($foodLog->image_path)
-                    <div style="margin-bottom:0.75rem;">
-                        <img src="{{ Storage::disk('public')->url($foodLog->image_path) }}" alt="Current food photo"
-                             style="max-height:100px;border-radius:8px;border:1px solid var(--border);">
-                        <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">Current photo</p>
-                    </div>
-                @endif
-                <div style="display:flex;align-items:center;gap:1rem;">
-                    <label for="image" class="btn btn-outline btn-sm" style="cursor:pointer;">
-                        <i data-lucide="image" style="width:14px;height:14px;"></i> {{ $foodLog->image_path ? 'Replace Food Photo' : 'Upload Food Photo' }}
-                    </label>
-                    <input type="file" id="image" name="image" accept="image/*" style="display:none;" onchange="previewFoodImage(this)">
-                    <span id="fileNameDisplay" style="font-size:0.75rem;color:var(--text-muted);">PNG, JPG, WEBP up to 3MB</span>
-                </div>
-                <div id="imagePreviewContainer" style="display:none;margin-top:0.75rem;">
-                    <img id="foodImagePreview" src="" alt="Preview" style="max-height:140px;border-radius:10px;object-fit:cover;border:1px solid var(--border);">
+                <label for="image" class="image-upload-dropzone" style="display:block;">
+                    <i data-lucide="camera" class="upload-icon"></i>
+                    <div class="upload-text">Click to change food photo</div>
+                    <div class="upload-subtext">PNG, JPG, or WEBP up to 3MB</div>
+                    <input type="file" id="image" name="image" accept="image/*" style="display:none;" onchange="window.SelfCare.previewImage(this, 'foodImagePreview')">
+                </label>
+                <div style="margin-top:0.75rem;text-align:center;">
+                    <img id="foodImagePreview" src="{{ $foodLog->image_url ?: '' }}" alt="Preview" style="{{ $foodLog->image_url ? 'display:block;' : 'display:none;' }}max-height:160px;margin:0 auto;border-radius:12px;border:1px solid var(--border);">
                 </div>
             </div>
 
             {{-- Notes --}}
             <div class="form-group">
-                <label class="form-label" for="notes">Notes / Ingredients</label>
+                <label class="form-label" for="notes">Notes</label>
                 <textarea id="notes" name="notes" class="form-control" rows="2">{{ old('notes', $foodLog->notes) }}</textarea>
             </div>
 
-            <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+            <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">
                 <a href="{{ route('food.index', ['date' => $foodLog->meal_date->toDateString()]) }}" class="btn btn-outline">Cancel</a>
-                <button type="submit" class="btn btn-primary" style="padding-left:1.5rem;padding-right:1.5rem;">
-                    <i data-lucide="save" style="width:14px;height:14px;"></i> Update Meal Record
+                <button type="submit" class="btn btn-primary" style="padding:0.6rem 1.75rem;">
+                    <i data-lucide="check" style="width:15px;height:15px;"></i> Update Meal
                 </button>
             </div>
         </form>
     </div>
 </div>
-
-@push('scripts')
-<style>
-    .meal-type-badge.selected {
-        background: var(--primary) !important;
-        color: #fff !important;
-        border-color: var(--primary) !important;
-    }
-</style>
-<script>
-    function updateMealSelection(radio) {
-        document.querySelectorAll('.meal-type-badge').forEach(b => b.classList.remove('selected'));
-        const badge = document.getElementById('badge_' + radio.value);
-        if (badge) {
-            badge.classList.add('selected');
-        }
-    }
-
-    function previewFoodImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('foodImagePreview').src = e.target.result;
-                document.getElementById('imagePreviewContainer').style.display = 'block';
-                document.getElementById('fileNameDisplay').textContent = input.files[0].name;
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-</script>
-@endpush
 @endsection

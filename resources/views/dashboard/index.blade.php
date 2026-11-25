@@ -113,7 +113,8 @@
             </div>
             <span class="badge badge-purple">Last 7 Days</span>
         </div>
-        <canvas id="weeklyCaloriesChart" style="max-height:220px;"></canvas>
+        @php $dashboardCalChartData = json_encode(['labels' => $weeklyCalories->pluck('date')->toArray(), 'data' => $weeklyCalories->pluck('calories')->toArray()]); @endphp
+        <canvas id="weeklyCaloriesChart" data-chart="weekly-calories" data-chart-data="{!! htmlspecialchars($dashboardCalChartData, ENT_QUOTES) !!}" style="max-height:220px;"></canvas>
     </div>
 
     {{-- Sleep Card --}}
@@ -217,53 +218,3 @@
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-    // Weekly Calories Chart
-    const ctx = document.getElementById('weeklyCaloriesChart').getContext('2d');
-    const weeklyData = @json($weeklyCalories);
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: weeklyData.map(d => d.date),
-            datasets: [{
-                label: 'Calories',
-                data: weeklyData.map(d => d.calories),
-                backgroundColor: 'rgba(142, 140, 216, 0.3)',
-                borderColor: 'rgba(142, 140, 216, 1)',
-                borderWidth: 2,
-                borderRadius: 8,
-                borderSkipped: false,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.parsed.y.toFixed(0)} kcal`
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                    ticks: {
-                        font: { size: 11 },
-                        callback: v => v.toFixed(0) + ' kcal'
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 11 } }
-                }
-            }
-        }
-    });
-</script>
-@endpush
